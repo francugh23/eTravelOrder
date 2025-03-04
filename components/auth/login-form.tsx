@@ -39,15 +39,17 @@ export const LoginForm = () => {
 
     startTransition(() => {
       login(values).then((data) => {
-        setError(data.error);
-        setSuccess(data.success);
+        if (data) {
+          setError(data.error);
+          setSuccess(data.success);
+        }
       });
     });
   };
 
   return (
     <CardWrapper
-      headerLabel="Welcome to DocuTrack!"
+      headerLabel="Welcome to eTravelOrder!"
       backButtonLabel="Don't have an account?"
       backButtonHref="/auth/register"
       showSocial

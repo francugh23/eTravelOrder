@@ -16,7 +16,7 @@ export const LoginButton = ({
 
   const router = useRouter();
   const onClick = () => {
-    router.push("/admin")
+    router.push("/settings")
   }
 
   if (mode === "modal") {
