@@ -14,13 +14,13 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
     return { error: "Invalid fields!" };
   }
 
-  const { username, password } = validatedFields.data;
+  const { email, password } = validatedFields.data;
 
   try {
     await signIn("credentials", {
-      username,
+      email,
       password,
-      reditrctTo: DEFAULT_LOGIN_REDIRECT,
+      redirectTo: DEFAULT_LOGIN_REDIRECT,
     });
   } catch (error) {
     if (error instanceof AuthError)
