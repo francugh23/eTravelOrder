@@ -1,10 +1,12 @@
 "use server";
+import { sendVerificationEmail } from "./../lib/mail";
 
 import * as z from "zod";
 import bcrypt from "bcrypt";
 import { RegisterSchema } from "@/schemas";
-import { db } from "@/lib/db";
-import { getUserByUsername } from "@/data/user";
+import prisma from "@/lib/db";
+import { getUserByEmail } from "@/data/user";
+import { generateVerificationToken } from "@/lib/tokens";
 
 export const register = async (values: z.infer<typeof RegisterSchema>) => {
   const validatedFields = RegisterSchema.safeParse(values);
@@ -16,13 +18,13 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
   const { email, password, name } = validatedFields.data;
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  const existingUser = await getUserByUsername(email);
+  const existingUser = await getUserByEmail(email);
 
   if (existingUser) {
     return { error: "Email already exists!" };
   }
 
-  await db.users.create({
+  await prisma.user.create({
     data: {
       email,
       password: hashedPassword,
@@ -30,7 +32,9 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
     },
   });
 
-  // TODO: Send verif token email
+  const verificationtoken = await generateVerificationToken(email);
 
-  return { success: "User created!" };
+  await sendVerificationEmail(verificationtoken.email, verificationtoken.token);
+
+  return { success: "Confirmation email sent!" };
 };

@@ -1,11 +1,23 @@
-import { PrismaClient} from '@prisma/client'
+//@ts-nocheck
+import { PrismaClient } from "@prisma/client";
 
+let prisma: PrismaClient;
 declare global {
-  var prisma: PrismaClient;
+  namespace NodeJS {
+    interface Global {
+      prisma: PrismaClient;
+    }
+  }
 }
 
-export const db = globalThis.prisma || new PrismaClient();
-
-if (process.env.NODE_ENV !== "production") {
-  globalThis.prisma = db;
+if (process.env.NODE_ENV === "production") {
+  prisma = new PrismaClient();
+} else {
+  if (!global.prisma) {
+    console.log("Connecting to MySQLDB Development " + process.env.DATABASE_URL);
+    global.prisma = new PrismaClient();
+  }
+  prisma = global.prisma;
 }
+
+export default prisma;
