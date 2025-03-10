@@ -12,7 +12,7 @@ const SettingsPage = () => {
   const onClick = () => {
     startTransition(() => {
       settings({
-        name: "New Name!",
+        name: "Yohan",
       });
     });
   };
