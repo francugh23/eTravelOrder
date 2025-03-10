@@ -35,7 +35,9 @@ export const {
       if (!existingUser?.emailVerified) return false;
 
       if (existingUser.isTwoFactorEnabled) {
-        const twoFactorConfirmation = await getTwoFactorConfirmationByUserId(existingUser.id);
+        const twoFactorConfirmation = await getTwoFactorConfirmationByUserId(
+          existingUser.id
+        );
 
         if (!twoFactorConfirmation) return false;
 
@@ -55,15 +57,23 @@ export const {
       if (token.role && session.user) {
         session.user.role = token.role as UserRole;
       }
+
+      if (session.user) {
+        session.user.isTwoFactorEnabled = token.isTwoFactorEnabled as boolean;
+      }
+
       return session;
     },
     async jwt({ token }) {
+      console.log("I AM BEING CALLED AGAIN!")
       if (!token.sub) return token;
 
       const existingUser = await getUserById(token.sub);
 
       if (!existingUser) return token;
+
       token.role = existingUser.role;
+      token.isTwoFactorEnabled = existingUser.isTwoFactorEnabled;
 
       return token;
     },
