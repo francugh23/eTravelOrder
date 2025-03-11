@@ -1,12 +1,12 @@
 "use server";
-import { sendVerificationEmail } from "./../lib/mail";
 
+// import { sendVerificationEmail } from "./../lib/mail";
+// import { generateVerificationToken } from "@/lib/tokens";
 import * as z from "zod";
 import bcrypt from "bcrypt";
 import { RegisterSchema } from "@/schemas";
 import prisma from "@/lib/db";
 import { getUserByEmail } from "@/data/user";
-import { generateVerificationToken } from "@/lib/tokens";
 
 export const register = async (values: z.infer<typeof RegisterSchema>) => {
   const validatedFields = RegisterSchema.safeParse(values);
@@ -32,9 +32,10 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
     },
   });
 
-  const verificationtoken = await generateVerificationToken(email);
+  // const verificationtoken = await generateVerificationToken(email);
 
-  await sendVerificationEmail(verificationtoken.email, verificationtoken.token);
+  // await sendVerificationEmail(verificationtoken.email, verificationtoken.token);
 
-  return { success: "Confirmation email sent!" };
+  // return { success: "Confirmation email sent!" };
+  return { success: "Registration successful!" };
 };

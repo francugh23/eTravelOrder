@@ -1,39 +1,27 @@
 "use client";
 
-import { UserButton } from "@/components/auth/user-button";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useCurrentUser } from "@/hooks/use-current-user";
 
 export const Navbar = () => {
-  const pathname = usePathname();
+  const user = useCurrentUser();
 
   return (
-    <nav className="bg-secondary flex justify-between items-center p-4 rounded-xl w-[600px] shadow-sm">
-      <div className="flex gap-x-2">
-        <Button
-          asChild
-          variant={pathname === "/server" ? "default" : "outline"}
-        >
-          <Link href={"/server"}>Server</Link>
-        </Button>
-        <Button
-          asChild
-          variant={pathname === "/client" ? "default" : "outline"}
-        >
-          <Link href={"/client"}>Client</Link>
-        </Button>
-        <Button asChild variant={pathname === "/admin" ? "default" : "outline"}>
-          <Link href={"/admin"}>Admin</Link>
-        </Button>
-        <Button
-          asChild
-          variant={pathname === "/settings" ? "default" : "outline"}
-        >
-          <Link href={"/settings"}>Settings</Link>
-        </Button>
-      </div>
-      <UserButton />
-    </nav>
+    <section className="relative w-full">
+      <nav className="bg-secondary flex justify-between items-center shadow-sm sticky right-0 left-0 top-0 py-3 px-5 bg-white h-16 z-40">
+        <span className="w-full sm:w-1/2 flex items-center gap-3">
+          <SidebarTrigger className="h-6 w-6 sm:h-7 sm:w-7" />
+          <div className="text-slate-400">|</div>
+          {user ? (
+            <h1 className="text-md font-semibold text-slate-600 uppercase text-muted-foreground">
+              Good day, {user?.name}!👋
+            </h1>
+          ) : (
+            <Skeleton className="w-[100px] h-[20px] rounded-full" />
+          )}
+        </span>
+      </nav>
+    </section>
   );
 };

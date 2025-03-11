@@ -1,5 +1,7 @@
 "user client";
 
+import { Poppins } from "next/font/google";
+import { cn } from "@/lib/utils";
 import {
   Card,
   CardContent,
@@ -18,6 +20,11 @@ interface CardWrapperProps {
   showSocial?: boolean;
 }
 
+const font = Poppins({
+  subsets: ["latin"],
+  weight: ["600"],
+});
+
 export const CardWrapper = ({
   children,
   headerLabel,
@@ -31,11 +38,11 @@ export const CardWrapper = ({
         <Header label={headerLabel} />
       </CardHeader>
       <CardContent>{children}</CardContent>
-      {showSocial && (
+      {/* {showSocial && (
         <CardFooter>
           <Social />
         </CardFooter>
-      )}
+      )} */}
       <CardFooter>
         <BackButton label={backButtonLabel} href={backButtonHref} />
       </CardFooter>

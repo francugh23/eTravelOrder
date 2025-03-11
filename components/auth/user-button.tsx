@@ -10,25 +10,43 @@ import { FaUser } from "react-icons/fa";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { LogoutButton } from "./logout-button";
-import { LogOut } from "lucide-react";
+import { ChevronsUpDown, LogOut, User } from "lucide-react";
+import { SidebarMenuButton } from "../ui/sidebar";
 
 export const UserButton = () => {
   const user = useCurrentUser();
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger>
-        <Avatar>
-          <AvatarImage src={user?.image || ""} />
-          <AvatarFallback className="bg-sky-500">
-            <FaUser className="text-white" />
-          </AvatarFallback>
-        </Avatar>
+      <DropdownMenuTrigger asChild>
+        <SidebarMenuButton className="h-[50px]">
+          <Avatar className="w-7 h-7 rounded-md">
+            <AvatarImage src={user?.image || ""} />
+            <AvatarFallback className="bg-[#FBF3B9]">
+              <FaUser className="text-black" />
+            </AvatarFallback>
+          </Avatar>
+          <span className="flex flex-col">
+            <p className="text-xs font-bold">{user?.name}</p>
+            <p
+              className="font-semibold"
+              style={{
+                fontSize: "0.65rem",
+              }}
+            >
+              {user?.email}
+            </p>
+          </span>
+          <ChevronsUpDown className="ml-auto" size={20} />
+        </SidebarMenuButton>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-40" align="end">
+      <DropdownMenuContent
+        side="right"
+        className="bg-white border rounded-md w-[200px] p-2 text-sm my-1"
+      >
         <LogoutButton>
           <DropdownMenuItem>
-            <LogOut className="h-4 w-4 mr-2"/>
+            <LogOut className="h-4 w-4 mr-2" />
             Logout
           </DropdownMenuItem>
         </LogoutButton>
