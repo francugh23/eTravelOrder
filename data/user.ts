@@ -1,3 +1,5 @@
+"use server"
+
 import prisma from "@/lib/db";
 
 export const getUserByEmail = async (email: string) => {
@@ -13,7 +15,7 @@ export const getUserByEmail = async (email: string) => {
   } finally {
     await prisma.$disconnect();
   }
-}
+};
 
 export const getUserById = async (id: string) => {
   try {
@@ -24,5 +26,28 @@ export const getUserById = async (id: string) => {
     return user;
   } catch {
     return null;
+  }
+};
+
+export const fetchUsers = async () => {
+  try {
+    await prisma.$connect();
+
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    return users;
+  } catch (error) {
+    return [];
+  } finally {
+    await prisma.$disconnect();
   }
 };

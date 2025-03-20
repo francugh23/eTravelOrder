@@ -56,16 +56,16 @@ export const LoginForm = () => {
 
           if (data?.success) {
             form.reset();
-            setSuccess(data.success);
+            setSuccess(data?.success);
           }
 
           // if (data?.twoFactor) {
           //   setShowTwoFactor(true);
           // }
         })
-        .catch(() => {
-          setError("Something went wrong!");
-        });
+        // .catch(() => {
+        //   setError("Something went wrong!");
+        // });
     });
   };
 
@@ -111,7 +111,7 @@ export const LoginForm = () => {
                     <Input
                       {...field}
                       type="email"
-                      placeholder="francugh23@gmail.com"
+                      placeholder="sample@gmail.com"
                       disabled={isPending}
                       autoComplete="off"
                     />

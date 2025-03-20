@@ -21,20 +21,20 @@ export const UserButton = () => {
       <DropdownMenuTrigger asChild>
         <SidebarMenuButton className="h-[50px]">
           <Avatar className="w-7 h-7 rounded-md">
-            <AvatarImage src={user?.image || ""} />
+            <AvatarImage src={user?.user?.image || ""} />
             <AvatarFallback className="bg-[#FBF3B9]">
               <FaUser className="text-black" />
             </AvatarFallback>
           </Avatar>
           <span className="flex flex-col">
-            <p className="text-xs font-bold">{user?.name}</p>
+            <p className="text-xs font-bold">{user?.user?.name}</p>
             <p
               className="font-semibold"
               style={{
                 fontSize: "0.65rem",
               }}
             >
-              {user?.email}
+              {user?.user?.email}
             </p>
           </span>
           <ChevronsUpDown className="ml-auto" size={20} />

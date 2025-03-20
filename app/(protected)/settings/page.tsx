@@ -46,9 +46,9 @@ const SettingsPage = () => {
     defaultValues: {
       password: undefined,
       newPassword: undefined,
-      name: user?.name || undefined,
-      email: user?.email || undefined,
-      role: user?.role || undefined,
+      name: user?.user?.name || undefined,
+      email: user?.user?.email || undefined,
+      role: user?.user?.role || undefined,
     },
   });
 
@@ -174,7 +174,8 @@ const SettingsPage = () => {
                         </FormControl>
                         <SelectContent>
                           <SelectItem value={UserRole.ADMIN}>Admin</SelectItem>
-                          <SelectItem value={UserRole.USER}>User</SelectItem>
+                          <SelectItem value={UserRole.CLIENT}>User</SelectItem>
+                          <SelectItem value={UserRole.SIGNATORY}>User</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />

@@ -5,7 +5,7 @@ export const SettingsSchema = z
   .object({
     name: z.optional(z.string()),
     isTwoFactorEnabled: z.optional(z.boolean()),
-    role: z.enum([UserRole.ADMIN, UserRole.USER]),
+    role: z.enum([UserRole.ADMIN, UserRole.CLIENT, UserRole.SIGNATORY]),
     email: z.optional(z.string().email()),
     password: z.optional(z.string().min(6)),
     newPassword: z.optional(z.string().min(6)),
@@ -77,4 +77,13 @@ export const NewPasswordSchema = z.object({
   password: z.string().min(6, {
     message: "Minimum of 6 characters required.",
   }),
+});
+
+export const AddUserSchema = z.object({
+  name: z.string().min(2, "Name must be at least 5 characters"),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  role: z.nativeEnum(UserRole),
+  image: z.instanceof(File).optional(),
+  signature: z.instanceof(File).optional(),
 });

@@ -3,6 +3,8 @@
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { title } from "@/components/fonts/font";
+import { cn } from "@/lib/utils";
 
 export const Navbar = () => {
   const user = useCurrentUser();
@@ -14,8 +16,8 @@ export const Navbar = () => {
           <SidebarTrigger className="h-6 w-6 sm:h-7 sm:w-7" />
           <div className="text-slate-400">|</div>
           {user ? (
-            <h1 className="text-md font-semibold text-slate-600 uppercase text-muted-foreground">
-              Good day, {user?.name}!👋
+            <h1 className={cn("text-md text-slate-600 uppercase text-muted-foreground", title.className)}>
+              Good day, {user?.user?.name}!👋
             </h1>
           ) : (
             <Skeleton className="w-[100px] h-[20px] rounded-full" />

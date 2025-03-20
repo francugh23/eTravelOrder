@@ -26,13 +26,12 @@ import { Separator } from "@/components/ui/separator";
 import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { CollapsibleContent } from "@radix-ui/react-collapsible";
 import { usePathname, useRouter } from "next/navigation";
-import { useCurrentRole } from "@/hooks/use-current-role";
 import AppSidebarFooter from "./sidebar-footer";
 import { UserRole } from "@prisma/client";
-// import { getCurrentUserTypeHook } from "@/hooks/user.hook";
+import { useCurrentUser } from "@/hooks/use-current-user";
 
 export function AppSidebar() {
-  const user = useCurrentRole();
+  const user = useCurrentUser();
 
   return (
     <Sidebar
@@ -58,7 +57,7 @@ export function AppSidebar() {
 
       <SidebarContent className="bg-white gap-2">
         {/* NAVIGATION */}
-        {user === UserRole.ADMIN && (
+        {user?.user?.role === UserRole.ADMIN && (
           <SidebarGroup>
             <SidebarGroupLabel>Navigation</SidebarGroupLabel>
             <SidebarGroupContent>
@@ -80,7 +79,7 @@ export function AppSidebar() {
           </SidebarGroup>
         )}
 
-        {user === UserRole.USER && (
+        {user?.user?.role === UserRole.CLIENT && (
           <SidebarGroup>
             <SidebarGroupLabel>Navigation</SidebarGroupLabel>
             <SidebarGroupContent>
