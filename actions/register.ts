@@ -26,9 +26,10 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
 
   await prisma.user.create({
     data: {
+      name,
       email,
       password: hashedPassword,
-      name,
+      stationId: "",
     },
   });
 

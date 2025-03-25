@@ -13,16 +13,35 @@ enum UserRole {
   SIGNATORY
 }
 
+enum Office {
+  SDO
+  School
+}
+
 model User {
-  id                    String                 @id @default(cuid())
-  name                  String?
-  email                 String?                @unique
-  password              String?
-  image                 Bytes?
-  signature             Bytes?
-  role                  UserRole               @default(CLIENT)
-  createdAt             DateTime               @default(now())
-  updatedAt             DateTime               @updatedAt
+  id                  String   @id @default(cuid())
+  name                String?
+  email               String?  @unique
+  password            String?
+  signature           String?
+  role                UserRole @default(CLIENT)
+  positionDesignation String?
+  stationId           String   @map("station_id")
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  station Station @relation(fields: [stationId], references: [id], onDelete: Cascade)
 
   @@map("users")
+}
+
+model Station {
+  id        String   @id @default(cuid())
+  office    Office   @default(School)
+  unit      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("stations")
+  User User[]
 }

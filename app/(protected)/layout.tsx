@@ -2,6 +2,7 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Footer } from "./_components/footer";
 import { Navbar } from "./_components/navbar";
 import { AppSidebar } from "./_components/sidebar";
+import { DevHoverCard } from "@/components/dev-card";
 
 interface ProtectedLayoutProps {
   children: React.ReactNode;
@@ -23,6 +24,7 @@ const ProtectedLayout = ({ children }: ProtectedLayoutProps) => {
           <div className="p-5">{children}</div>
         </main>
       </SidebarInset>
+      <DevHoverCard />
     </SidebarProvider>
   );
 };

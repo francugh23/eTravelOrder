@@ -13,13 +13,21 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { DataTablePagination } from "@/components/data-table/pagination";
-import { DataTableToolbar } from "@/app/(protected)/users/table/toolbar"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { DataTableToolbar } from "@/app/(protected)/users/table/toolbar";
+import { DataTablePaginationNoCheckBox } from "@/components/data-table/pagination-no-checkbox";
+import { DeleteUserModal } from "../_components/delete-modal";
 
 interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[]
-  data: TData[]
+  columns: ColumnDef<TData, TValue>[];
+  data: TData[];
 }
 
 export function DataTable<TData, TValue>({
@@ -85,12 +93,19 @@ export function DataTable<TData, TValue>({
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
+                    <DeleteUserModal
+                      key={cell.id}
+                      // @ts-ignore
+                      row={row.original.id}
+                      trigger={
+                        <TableCell key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </TableCell>
+                      }
+                    />
                   ))}
                 </TableRow>
               ))
@@ -107,7 +122,7 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <DataTablePagination table={table} />
+      <DataTablePaginationNoCheckBox table={table} />
     </div>
   );
 }

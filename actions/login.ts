@@ -8,7 +8,6 @@ import { LoginSchema } from "@/schemas";
 import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
 import { getUserByEmail } from "@/data/user";
 import { getSession } from "next-auth/react";
-import { redirect } from "next/navigation";
 // import {
 //   generateVerificationToken,
 //   generateTwoFactorToken,
@@ -102,7 +101,7 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
     await signIn("credentials", {
       email,
       password,
-      redirectTo: DEFAULT_LOGIN_REDIRECT,
+      redirectTo: DEFAULT_LOGIN_REDIRECT(existingUser.role),
     });
 
     const session = await getSession();

@@ -13,45 +13,55 @@ export const createUser = async (values: z.infer<typeof AddUserSchema>) => {
     return { error: "Invalid fields!" };
   }
 
-  const { email, password, name, role, image, signature } =
-    validatedFields.data;
+  const {
+    email,
+    password,
+    name,
+    role,
+    signature,
+    stationId,
+    positionDesignation,
+  } = validatedFields.data;
 
   const existingUser = await getUserByEmail(email);
 
-  if (existingUser) {
+  if (existingUser?.email) {
     return { error: "Email already exists!" };
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  let imageBuffer: Buffer | null = null;
-  let signatureBuffer: Buffer | null = null;
-
-  if (image) {
-    const arrayBuffer = await image.arrayBuffer();
-    imageBuffer = Buffer.from(arrayBuffer);
-  }
-
-  if (signature) {
-    const arrayBuffer = await signature.arrayBuffer();
-    signatureBuffer = Buffer.from(arrayBuffer);
-  }
-
   try {
-    const data = await prisma.user.create({
+    await prisma.user.create({
       data: {
         email,
         password: hashedPassword,
         name,
         role,
-        image: imageBuffer || undefined,
-        signature: signatureBuffer || undefined,
+        signature,
+        stationId,
+        positionDesignation,
       },
     });
 
     return { success: "User created successfully!" };
   } catch (error) {
-    console.error("Error creating user: ", error);
     return { error: "Failed to create user!" };
   }
 };
+
+export async function deleteUserById(id: string) {
+  try {
+    await prisma.$connect();
+
+    await prisma.user.delete({
+      where: { id: id },
+    });
+
+    return { success: "Success!" };
+  } catch (e) {
+    return { error: "Oops!" };
+  } finally {
+    await prisma.$disconnect();
+  }
+}

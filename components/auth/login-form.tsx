@@ -21,6 +21,7 @@ import { FormError } from "../form-error";
 import { FormSuccess } from "../form-success";
 import { login } from "@/actions/login";
 import Link from "next/link";
+import { DotLoader } from "react-spinners";
 
 export const LoginForm = () => {
   const searchParams = useSearchParams();
@@ -47,25 +48,24 @@ export const LoginForm = () => {
     setSuccess("");
 
     startTransition(() => {
-      login(values)
-        .then((data) => {
-          if (data?.error) {
-            form.reset();
-            setError(data.error);
-          }
+      login(values).then((data) => {
+        if (data?.error) {
+          form.reset();
+          setError(data.error);
+        }
 
-          if (data?.success) {
-            form.reset();
-            setSuccess(data?.success);
-          }
+        if (data?.success) {
+          form.reset();
+          setSuccess(data?.success);
+        }
 
-          // if (data?.twoFactor) {
-          //   setShowTwoFactor(true);
-          // }
-        })
-        // .catch(() => {
-        //   setError("Something went wrong!");
-        // });
+        // if (data?.twoFactor) {
+        //   setShowTwoFactor(true);
+        // }
+      });
+      // .catch(() => {
+      //   setError("Something went wrong!");
+      // });
     });
   };
 

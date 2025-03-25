@@ -14,14 +14,24 @@ export const authRoutes = [
   "/auth/register",
   "/auth/error",
   "/auth/reset",
-  "/auth/new-password"
+  "/auth/new-password",
 ];
 
 export const apiAuthPrefix = "/api/auth";
 
 /**
  * The default redirect path after logging in
- * @type {string}
+ * @param {string} role - The role of the user
+ * @returns {string} - The redirect path
  */
-
-export const DEFAULT_LOGIN_REDIRECT = "/client";
+export const DEFAULT_LOGIN_REDIRECT = (role: string): string => {
+  if (role === "ADMIN") {
+    return "/users";
+  } else if (role === "CLIENT") {
+    return "/client";
+  } else if (role === "SIGNATORY") {
+    return "/signatory";
+  } else {
+    return "/auth/login";
+  }
+};

@@ -2,19 +2,11 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  BadgeCheck,
-  CircleUserRound,
-  Eye,
-  EyeOff,
-  TriangleAlert,
-  Upload,
-  UserPlus2,
-} from "lucide-react";
+import { Eye, EyeOff, TriangleAlert, UserPlus2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -26,6 +18,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+
 import {
   Form,
   FormControl,
@@ -35,6 +28,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -43,19 +37,51 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { UserRole } from "@prisma/client";
 import { AddUserSchema } from "@/schemas";
 import { createUser } from "@/actions/create-user";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useEdgeStore } from "@/lib/edgestore";
+import { SingleImageDropzone } from "@/components/single-image-dropzone";
+import { useCurrentUser } from "@/hooks/use-current-user";
+import { fetchStations } from "@/data/stations";
 
-export function AddUserDialog() {
+interface AddUserDialogProps {
+  onUpdate: () => void;
+}
+
+export function AddUserDialog({ onUpdate }: AddUserDialogProps) {
+  const user = useCurrentUser();
+  const { edgestore } = useEdgeStore();
+
   const [open, setOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [signaturePreview, setSignaturePreview] = useState<string | null>(null);
+  const [file, setFile] = useState<File>();
+  const [url, setUrl] = useState<string>();
+  const [progress, setProgress] = useState(0);
+
+  const [station, setStation] = useState<any>([]);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const res = await fetchStations();
+        setStation(res);
+      } catch (e) {
+        return null;
+      }
+    }
+    fetchData();
+  }, []);
 
   // Initialize the form
   const form = useForm<z.infer<typeof AddUserSchema>>({
@@ -64,31 +90,34 @@ export function AddUserDialog() {
       name: "",
       email: "",
       password: "",
+      stationId: "",
       role: UserRole.CLIENT,
+      signature: "",
+      positionDesignation: "",
     },
   });
 
   const onSubmit = async (data: z.infer<typeof AddUserSchema>) => {
     try {
-      const result = await createUser(data);
+      console.log("Payload", { data });
+      // const result = await createUser(data);
 
-      if (result?.error) {
-        toast("Oops", {
-          description: result?.error || "An error occurred!",
-          duration: 5000,
-          icon: <TriangleAlert className="text-red-500" size={20} />,
-        });
-      } else {
-        toast("Success", {
-          description: result?.success || "User created successfully!",
-          duration: 5000,
-          icon: <BadgeCheck className="text-green-500" size={20} />,
-        });
-        setOpen(false);
-        form.reset();
-        setImagePreview(null);
-        setSignaturePreview(null);
-      }
+      // if (result?.error) {
+      //   toast("Oops", {
+      //     description: result?.error || "An error occurred!",
+      //     duration: 5000,
+      //     icon: <TriangleAlert className="text-red-500" size={20} />,
+      //   });
+      // } else {
+      //   toast("Success", {
+      //     description: result?.success || "User created successfully!",
+      //     duration: 5000,
+      //     icon: <BadgeCheck className="text-green-500" size={20} />,
+      //   });
+      //   setOpen(false);
+      //   form.reset();
+      //   onUpdate();
+      // }
     } catch (error) {
       console.error("Error creating user:", error);
       toast("Oops!", {
@@ -99,44 +128,12 @@ export function AddUserDialog() {
     }
   };
 
-  const handleImageChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    onChange: (file: File) => void
-  ) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      onChange(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleSignatureChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    onChange: (file: File) => void
-  ) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      onChange(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setSignaturePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-  
   return (
     <Dialog
       open={open}
       onOpenChange={(newOpen) => {
         if (!newOpen) {
           form.reset();
-          setImagePreview(null);
-          setSignaturePreview(null);
         }
         setOpen(newOpen);
       }}
@@ -147,7 +144,7 @@ export function AddUserDialog() {
           Add User
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[550px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">Add New User</DialogTitle>
           <DialogDescription className="text-muted-foreground">
@@ -222,22 +219,37 @@ export function AddUserDialog() {
                             className="h-10 pr-10"
                             {...field}
                           />
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="absolute right-0 top-0 h-full px-3 py-2 text-muted-foreground"
-                            onClick={() => setShowPassword(!showPassword)}
-                          >
-                            {showPassword ? (
-                              <EyeOff className="h-4 w-4" />
-                            ) : (
-                              <Eye className="h-4 w-4" />
-                            )}
-                            <span className="sr-only">
-                              {showPassword ? "Hide password" : "Show password"}
-                            </span>
-                          </Button>
+                          {showPassword ? (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger
+                                  type="button"
+                                  className="absolute right-0 top-0 h-full px-3 py-2 text-muted-foreground"
+                                  onClick={() => setShowPassword(!showPassword)}
+                                >
+                                  <EyeOff className="h-4 w-4" />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Hide Password</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          ) : (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger
+                                  type="button"
+                                  className="absolute right-0 top-0 h-full px-3 py-2 text-muted-foreground"
+                                  onClick={() => setShowPassword(!showPassword)}
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Show Password</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          )}
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -282,44 +294,49 @@ export function AddUserDialog() {
               <div className="space-y-5">
                 <FormField
                   control={form.control}
-                  name="image"
-                  render={({ field: { value, onChange, ...fieldProps } }) => (
+                  name="positionDesignation"
+                  render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-sm font-medium">
-                        Profile Image
+                        Position/Designation
                       </FormLabel>
                       <FormControl>
-                        <Card className="border-dashed">
-                          <CardContent className="p-4 flex flex-col items-center justify-center space-y-4">
-                            <Avatar className="h-20 w-20">
-                              <AvatarImage src={imagePreview || undefined} />
-                              <AvatarFallback>
-                                <CircleUserRound className="text-gray-400 h-20 w-20" />
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex flex-col items-center gap-2">
-                              <label
-                                htmlFor="image-upload"
-                                className="cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2"
-                              >
-                                <Upload className="mr-2 h-4 w-4" />
-                                Upload Image
-                              </label>
-                              <Input
-                                id="image-upload"
-                                type="file"
-                                accept="image/*"
-                                className="hidden"
-                                onChange={(e) => handleImageChange(e, onChange)}
-                                {...fieldProps}
-                              />
-                              <p className="text-xs text-muted-foreground">
-                                JPG, PNG or GIF, max 2MB
-                              </p>
-                            </div>
-                          </CardContent>
-                        </Card>
+                        <Input
+                          placeholder="Teacher I"
+                          className="h-10"
+                          {...field}
+                        />
                       </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="stationId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium">
+                        Permanent Station
+                      </FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-10">
+                            <SelectValue placeholder="Select a station" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {station.map((station: any) => (
+                            <SelectItem key={station.id} value={station.id}>
+                              {station.unit}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -336,40 +353,65 @@ export function AddUserDialog() {
                       <FormControl>
                         <Card className="border-dashed">
                           <CardContent className="p-4 flex flex-col items-center justify-center space-y-4">
-                            <div className="h-20 w-40 rounded border bg-muted flex items-center justify-center overflow-hidden">
-                              {signaturePreview ? (
-                                <img
-                                  src={signaturePreview || "/placeholder.svg"}
-                                  alt="Signature Preview"
-                                  className="h-full w-full object-contain"
-                                />
-                              ) : (
-                                <p className="text-sm text-muted-foreground">
-                                  Signature Preview
-                                </p>
-                              )}
-                            </div>
                             <div className="flex flex-col items-center gap-2">
-                              <label
-                                htmlFor="signature-upload"
-                                className="cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2"
-                              >
-                                <Upload className="mr-2 h-4 w-4" />
-                                Upload Signature
-                              </label>
-                              <Input
-                                id="signature-upload"
-                                type="file"
-                                accept="image/*"
-                                className="hidden"
-                                onChange={(e) =>
-                                  handleSignatureChange(e, onChange)
-                                }
-                                {...fieldProps}
+                              <SingleImageDropzone
+                                width={100}
+                                height={100}
+                                value={file}
+                                dropzoneOptions={{
+                                  maxSize: 1 * 1024 * 1024, // 1MB max
+                                }}
+                                onChange={async () => {
+                                  if (file) {
+                                    const res =
+                                      await edgestore.myPublicImages.upload({
+                                        file,
+                                        options: {
+                                          temporary: true,
+                                        },
+                                        input: { type: user?.user?.role },
+                                        onProgressChange: (progress) => {
+                                          setProgress(progress);
+                                        },
+                                      });
+                                    setUrl(res.url);
+                                    onChange(res.url);
+                                  }
+                                }}
                               />
                               <p className="text-xs text-muted-foreground">
-                                JPG, PNG or GIF, max 2MB
+                                JPG or PNG, max 1MB
                               </p>
+                              <button
+                                className="cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2"
+                                onClick={async () => {
+                                  if (file) {
+                                    const res =
+                                      await edgestore.myPublicImages.upload({
+                                        file,
+                                        input: { type: user?.user?.role },
+                                        onProgressChange: (progress) => {
+                                          setProgress(progress);
+                                        },
+                                      });
+                                    setUrl(res.url);
+                                    onChange(res.url);
+                                  }
+                                }}
+                                disabled={!file}
+                                type="button"
+                              >
+                                Upload
+                              </button>
+                            </div>
+                            <div
+                              className="h-[6px] w-full border rounded overflow-hidden"
+                              hidden={!file}
+                            >
+                              <div
+                                className="h-full bg-black transition-all duration-150"
+                                style={{ width: `${progress}%` }}
+                              />
                             </div>
                           </CardContent>
                         </Card>
@@ -382,17 +424,24 @@ export function AddUserDialog() {
             </div>
 
             <DialogFooter className="pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setOpen(false)}
-                className="mr-2"
-              >
-                Cancel
-              </Button>
-              <Button type="submit" className="bg-primary hover:bg-primary/90">
-                Create User
-              </Button>
+              {!file ? (
+                <Button className="w-full" variant="ghost">
+                  Don't forget to upload you signature.
+                </Button>
+              ) : (
+                <Button
+                  type="submit"
+                  className="bg-primary hover:bg-primary/90 w-full"
+                  disabled={!file}
+                  onClick={async () => {
+                    if (url) {
+                      await edgestore.myPublicImages.confirmUpload({ url });
+                    }
+                  }}
+                >
+                  Create
+                </Button>
+              )}
             </DialogFooter>
           </form>
         </Form>

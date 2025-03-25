@@ -11,7 +11,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Edit, Trash, UserRound } from "lucide-react";
+import { Trash, UserRound } from "lucide-react";
+import { DeleteUserModal } from "@/app/(protected)/users/_components/delete-modal";
+import { useState } from "react";
 
 interface DataTableRowActionsProps<TData> {
   row: Row<TData>;
@@ -20,10 +22,6 @@ interface DataTableRowActionsProps<TData> {
 export function DataTableRowActions<TData>({
   row,
 }: DataTableRowActionsProps<TData>) {
-  const onClick = () => {
-    // @ts-ignore
-    console.log(row.original.id);
-  };
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -37,15 +35,17 @@ export function DataTableRowActions<TData>({
           <UserRound className="mr-2 h-4 w-4" />
           View details
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={onClick}>
-          <Edit className="mr-2 h-4 w-4" />
-          Edit
-        </DropdownMenuItem>
-        {/* <DropdownMenuSeparator />
-        <DropdownMenuItem className="text-destructive focus:text-destructive">
-          <Trash className="mr-2 h-4 w-4" />
-          Delete
-        </DropdownMenuItem> */}
+        <DropdownMenuSeparator />
+        <DeleteUserModal
+          // @ts-ignore
+          user={row.original.id}
+          trigger={
+            <DropdownMenuItem className="text-destructive focus:text-destructive">
+              <Trash className="mr-2 h-4 w-4" />
+              Delete
+            </DropdownMenuItem>
+          }
+        />
       </DropdownMenuContent>
     </DropdownMenu>
   );

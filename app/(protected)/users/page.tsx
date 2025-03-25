@@ -36,6 +36,11 @@ const UsersPage = () => {
     fetchData();
   }, []);
 
+  async function refetchData() {
+    const res = await fetchUsers();
+    setData(res);
+  }
+
   return (
     <Card className="shadow-md w-full">
       <CardHeader className="pb-2">
@@ -55,7 +60,7 @@ const UsersPage = () => {
               Manage user accounts and permissions.
             </CardDescription>
           </div>
-          <AddUserDialog />
+          <AddUserDialog onUpdate={refetchData} />
         </div>
       </CardHeader>
       <CardContent>
