@@ -35,8 +35,8 @@ export default async function RootLayout({
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
           <EdgeStoreProvider>
-            {children}
             <Toaster />
+            {children}
           </EdgeStoreProvider>
         </body>
       </html>

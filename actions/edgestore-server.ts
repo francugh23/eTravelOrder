@@ -5,7 +5,7 @@ import {
   createEdgeStoreNextHandler,
 } from "@edgestore/server/adapters/next/app";
 import { z } from "zod";
-import { getCurrentUser } from "@/actions/server"; 
+import { getCurrentUser } from "@/actions/server";
 
 type Context = {
   userId: string;
@@ -49,6 +49,18 @@ export const edgeStoreRouter = es.router({
         },
       ],
     }),
+
+  myPublicFiles: es
+    .fileBucket({
+      maxSize: 1024 * 1024 * 10, // 10MB
+      accept: ["application/pdf"],
+    })
+    .input(
+      z.object({
+        type: z.enum(Object.values(UserRole) as [UserRole, ...UserRole[]]),
+      })
+    )
+    .path(({ input }) => [{ type: input.type }]),
 });
 
 export type EdgeStoreRouter = typeof edgeStoreRouter;

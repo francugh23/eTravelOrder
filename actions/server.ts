@@ -41,6 +41,8 @@ export async function getCurrentUser(): Promise<UserResponse> {
         // image: true,
         password: true,
         role: true,
+        positionDesignation: true,
+        stationId: true,
       },
     });
 

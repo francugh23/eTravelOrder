@@ -85,6 +85,16 @@ export const AddUserSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
   stationId: z.string().min(1, "Permanent Station is required."),
   role: z.nativeEnum(UserRole),
-  signature: z.string().optional(),
+  signature: z.string().min(2, "Please upload a digital signature."),
   positionDesignation: z.string().min(1, "Position/Designation is required."),
+});
+
+export const TravelFormSchema = z.object({
+  additionalParticipants: z.optional(z.string()),
+  purpose: z.string().min(1, { message: "Purpose is required" }),
+  host: z.string().min(1, { message: "Host is required" }),
+  inclusiveDates: z.string().min(1, { message: "Inclusive Dates is required" }),
+  destination: z.string().min(1, { message: "Destination is required" }),
+  fundSource: z.string().min(1, { message: "Fund Source is required" }),
+  attachedFile: z.string(),
 });

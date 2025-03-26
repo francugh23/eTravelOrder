@@ -1,9 +1,9 @@
 "use server";
 
 import * as z from "zod";
+import prisma from "@/lib/db";
 import bcrypt from "bcrypt";
 import { AddUserSchema } from "@/schemas";
-import prisma from "@/lib/db";
 import { getUserByEmail } from "@/data/user";
 
 export const createUser = async (values: z.infer<typeof AddUserSchema>) => {

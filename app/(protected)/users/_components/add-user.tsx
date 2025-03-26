@@ -6,7 +6,13 @@ import { useEffect, useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, TriangleAlert, UserPlus2 } from "lucide-react";
+import {
+  BadgeCheck,
+  Eye,
+  EyeOff,
+  TriangleAlert,
+  UserPlus2,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -38,7 +44,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { UserRole } from "@prisma/client";
@@ -51,9 +56,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useEdgeStore } from "@/lib/edgestore";
-import { SingleImageDropzone } from "@/components/single-image-dropzone";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { fetchStations } from "@/data/stations";
+import { FileState, MultiFileDropzone } from "@/components/multi-file-zropzone";
 
 interface AddUserDialogProps {
   onUpdate: () => void;
@@ -65,9 +70,9 @@ export function AddUserDialog({ onUpdate }: AddUserDialogProps) {
 
   const [open, setOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [file, setFile] = useState<File>();
   const [url, setUrl] = useState<string>();
-  const [progress, setProgress] = useState(0);
+
+  const [fileStates, setFileStates] = useState<FileState[]>([]);
 
   const [station, setStation] = useState<any>([]);
 
@@ -82,6 +87,19 @@ export function AddUserDialog({ onUpdate }: AddUserDialogProps) {
     }
     fetchData();
   }, []);
+
+  function updateFileProgress(key: string, progress: FileState["progress"]) {
+    setFileStates((fileStates) => {
+      const newFileStates = structuredClone(fileStates);
+      const fileState = newFileStates.find(
+        (fileState) => fileState.key === key
+      );
+      if (fileState) {
+        fileState.progress = progress;
+      }
+      return newFileStates;
+    });
+  }
 
   // Initialize the form
   const form = useForm<z.infer<typeof AddUserSchema>>({
@@ -99,25 +117,24 @@ export function AddUserDialog({ onUpdate }: AddUserDialogProps) {
 
   const onSubmit = async (data: z.infer<typeof AddUserSchema>) => {
     try {
-      console.log("Payload", { data });
-      // const result = await createUser(data);
+      const result = await createUser(data);
 
-      // if (result?.error) {
-      //   toast("Oops", {
-      //     description: result?.error || "An error occurred!",
-      //     duration: 5000,
-      //     icon: <TriangleAlert className="text-red-500" size={20} />,
-      //   });
-      // } else {
-      //   toast("Success", {
-      //     description: result?.success || "User created successfully!",
-      //     duration: 5000,
-      //     icon: <BadgeCheck className="text-green-500" size={20} />,
-      //   });
-      //   setOpen(false);
-      //   form.reset();
-      //   onUpdate();
-      // }
+      if (result?.error) {
+        toast("Oops", {
+          description: result?.error || "An error occurred!",
+          duration: 5000,
+          icon: <TriangleAlert className="text-red-500" size={20} />,
+        });
+      } else {
+        toast("Success", {
+          description: result?.success || "User created successfully!",
+          duration: 5000,
+          icon: <BadgeCheck className="text-green-500" size={20} />,
+        });
+        setOpen(false);
+        form.reset();
+        onUpdate();
+      }
     } catch (error) {
       console.error("Error creating user:", error);
       toast("Oops!", {
@@ -351,70 +368,60 @@ export function AddUserDialog({ onUpdate }: AddUserDialogProps) {
                         Signature
                       </FormLabel>
                       <FormControl>
-                        <Card className="border-dashed">
-                          <CardContent className="p-4 flex flex-col items-center justify-center space-y-4">
-                            <div className="flex flex-col items-center gap-2">
-                              <SingleImageDropzone
-                                width={100}
-                                height={100}
-                                value={file}
-                                dropzoneOptions={{
-                                  maxSize: 1 * 1024 * 1024, // 1MB max
-                                }}
-                                onChange={async () => {
-                                  if (file) {
+                        <div className="flex flex-col items-center gap-2">
+                          <MultiFileDropzone
+                            value={fileStates}
+                            onChange={(files) => {
+                              setFileStates(files);
+                            }}
+                            dropzoneOptions={{
+                              maxSize: 1 * 1024 * 1024,
+                              maxFiles: 1,
+                            }}
+                            onFilesAdded={async (addedFiles) => {
+                              setFileStates([...fileStates, ...addedFiles]);
+                              await Promise.all(
+                                addedFiles.map(async (addedFileState) => {
+                                  try {
                                     const res =
                                       await edgestore.myPublicImages.upload({
-                                        file,
+                                        file: addedFileState.file,
+                                        input: { type: user?.user?.role },
                                         options: {
                                           temporary: true,
                                         },
-                                        input: { type: user?.user?.role },
-                                        onProgressChange: (progress) => {
-                                          setProgress(progress);
+                                        onProgressChange: async (progress) => {
+                                          updateFileProgress(
+                                            addedFileState.key,
+                                            progress
+                                          );
+                                          if (progress === 100) {
+                                            await new Promise((resolve) =>
+                                              setTimeout(resolve, 1000)
+                                            );
+                                            updateFileProgress(
+                                              addedFileState.key,
+                                              "COMPLETE"
+                                            );
+                                          }
                                         },
                                       });
                                     setUrl(res.url);
                                     onChange(res.url);
+                                  } catch (err) {
+                                    updateFileProgress(
+                                      addedFileState.key,
+                                      "ERROR"
+                                    );
                                   }
-                                }}
-                              />
-                              <p className="text-xs text-muted-foreground">
-                                JPG or PNG, max 1MB
-                              </p>
-                              <button
-                                className="cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2"
-                                onClick={async () => {
-                                  if (file) {
-                                    const res =
-                                      await edgestore.myPublicImages.upload({
-                                        file,
-                                        input: { type: user?.user?.role },
-                                        onProgressChange: (progress) => {
-                                          setProgress(progress);
-                                        },
-                                      });
-                                    setUrl(res.url);
-                                    onChange(res.url);
-                                  }
-                                }}
-                                disabled={!file}
-                                type="button"
-                              >
-                                Upload
-                              </button>
-                            </div>
-                            <div
-                              className="h-[6px] w-full border rounded overflow-hidden"
-                              hidden={!file}
-                            >
-                              <div
-                                className="h-full bg-black transition-all duration-150"
-                                style={{ width: `${progress}%` }}
-                              />
-                            </div>
-                          </CardContent>
-                        </Card>
+                                })
+                              );
+                            }}
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            JPG or PNG, max 1MB
+                          </p>
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -424,15 +431,15 @@ export function AddUserDialog({ onUpdate }: AddUserDialogProps) {
             </div>
 
             <DialogFooter className="pt-4">
-              {!file ? (
-                <Button className="w-full" variant="ghost">
+              {!url ? (
+                <p className="w-full text-muted-background text-xs">
                   Don't forget to upload you signature.
-                </Button>
+                </p>
               ) : (
                 <Button
                   type="submit"
                   className="bg-primary hover:bg-primary/90 w-full"
-                  disabled={!file}
+                  disabled={!url}
                   onClick={async () => {
                     if (url) {
                       await edgestore.myPublicImages.confirmUpload({ url });
