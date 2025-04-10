@@ -39,6 +39,7 @@ export async function getCurrentUser(): Promise<UserResponse> {
         name: true,
         email: true,
         // image: true,
+        signature: true,
         password: true,
         role: true,
         positionDesignation: true,

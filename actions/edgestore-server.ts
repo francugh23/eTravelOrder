@@ -1,9 +1,6 @@
 import { UserRole } from "@prisma/client";
 import { initEdgeStore } from "@edgestore/server";
-import {
-  CreateContextOptions,
-  createEdgeStoreNextHandler,
-} from "@edgestore/server/adapters/next/app";
+import { createEdgeStoreNextHandler } from "@edgestore/server/adapters/next/app";
 import { z } from "zod";
 import { getCurrentUser } from "@/actions/server";
 
@@ -14,6 +11,11 @@ type Context = {
 
 async function createContext(): Promise<Context> {
   const user = await getCurrentUser();
+
+  if (!user) {
+    console.error("No user found in getCurrentUser()");
+    throw new Error("User not found");
+  }
 
   return {
     userId: user.uid as string,

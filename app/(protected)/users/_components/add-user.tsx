@@ -46,7 +46,7 @@ import {
 
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { UserRole } from "@prisma/client";
+import { Office, UserRole } from "@prisma/client";
 import { AddUserSchema } from "@/schemas";
 import { createUser } from "@/actions/create-user";
 import {
@@ -57,8 +57,9 @@ import {
 } from "@/components/ui/tooltip";
 import { useEdgeStore } from "@/lib/edgestore";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { fetchStations } from "@/data/stations";
+import { fetchStations, fetchStationsByOffice } from "@/data/stations";
 import { FileState, MultiFileDropzone } from "@/components/multi-file-zropzone";
+import NonFormSelect from "@/components/custom/nonform-select";
 
 interface AddUserDialogProps {
   onUpdate: () => void;
@@ -75,18 +76,31 @@ export function AddUserDialog({ onUpdate }: AddUserDialogProps) {
   const [fileStates, setFileStates] = useState<FileState[]>([]);
 
   const [station, setStation] = useState<any>([]);
+  const [office, setOffice] = useState<Office>("SDO" as Office);
+
+  // useEffect(() => {
+  //   async function fetchData() {
+  //     try {
+  //       const res = await fetchStations();
+  //       setStation(res);
+  //     } catch (e) {
+  //       return null;
+  //     }
+  //   }
+  //   fetchData();
+  // }, []);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const res = await fetchStations();
+        const res = await fetchStationsByOffice(office);
         setStation(res);
       } catch (e) {
         return null;
       }
     }
     fetchData();
-  }, []);
+  }, [office])
 
   function updateFileProgress(key: string, progress: FileState["progress"]) {
     setFileStates((fileStates) => {
@@ -329,6 +343,19 @@ export function AddUserDialog({ onUpdate }: AddUserDialogProps) {
                   )}
                 />
 
+                <div className="space-y-2">
+                  <NonFormSelect
+                    placeholder=""
+                    label="Office"
+                    options={[
+                      { value: "SDO", label: "SDO" },
+                      { value: "School", label: "School" },
+                    ]}
+                    defaultValue="SDO"
+                    getValue={(value) => setOffice(value as Office)}
+                  />
+                </div>
+
                 <FormField
                   control={form.control}
                   name="stationId"
@@ -375,7 +402,7 @@ export function AddUserDialog({ onUpdate }: AddUserDialogProps) {
                               setFileStates(files);
                             }}
                             dropzoneOptions={{
-                              maxSize: 1 * 1024 * 1024,
+                              maxSize: 5 * 1024 * 1024,
                               maxFiles: 1,
                             }}
                             onFilesAdded={async (addedFiles) => {
@@ -419,7 +446,7 @@ export function AddUserDialog({ onUpdate }: AddUserDialogProps) {
                             }}
                           />
                           <p className="text-xs text-muted-foreground">
-                            JPG or PNG, max 1MB
+                            JPG or PNG, max 5MB
                           </p>
                         </div>
                       </FormControl>

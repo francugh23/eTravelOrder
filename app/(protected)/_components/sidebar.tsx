@@ -7,6 +7,7 @@ import {
   LucideIcon,
   NotebookPen,
   UsersRound,
+  Car,
 } from "lucide-react";
 import Image from "next/image";
 import {
@@ -36,7 +37,7 @@ export function AppSidebar() {
   return (
     <Sidebar
       variant="sidebar"
-      collapsible="offcanvas"
+      collapsible="icon"
       className="font-medium shadow"
     >
       {/* HEADER */}
@@ -50,7 +51,7 @@ export function AppSidebar() {
               height={45}
             />
           </span>
-          <span className="text-xs align-text-bottom">v1.0</span>
+          <span className="text-4xl align-text-bottom font-bold">e-Travel</span>
         </section>
         <Separator />
       </SidebarHeader>
@@ -85,14 +86,14 @@ export function AppSidebar() {
             <SidebarGroupContent>
               <SidebarMenuSingle
                 menuItems={[
-                  { menuTitle: "Home", url: "/client", menuIcon: Home },
+                  { menuTitle: "Home", url: "/home", menuIcon: Home },
                 ]}
               />
               <SidebarMenuSingle
                 menuItems={[
                   {
                     menuTitle: "Travel Order",
-                    url: "/server",
+                    url: "/client",
                     menuIcon: NotebookPen,
                   },
                 ]}

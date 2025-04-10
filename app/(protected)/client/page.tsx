@@ -8,7 +8,7 @@ const ClientPage = () => {
 
   return (
     <ClientForm user={user} label="Travel Order Form" />
-    // <UserInfo user={user} label="Client component" />;
+    /* <UserInfo user={user} label="Client component" />;  */
   );
 };
 

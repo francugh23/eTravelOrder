@@ -38,9 +38,11 @@ import {
 } from "../../../../components/multi-file-zropzone";
 import { useEdgeStore } from "@/lib/edgestore";
 import { Button } from "../../../../components/ui/button";
-import { BadgeCheck, TriangleAlert, UserPlus } from "lucide-react";
+import { BadgeCheck, TriangleAlert } from "lucide-react";
 import { createTravelOrder } from "@/actions/travel-order";
 import { toast } from "sonner";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import { TravelOrderPDF } from "@/components/custom/pdf-file";
 
 interface ClientFormProps {
   user?: any;
@@ -98,8 +100,6 @@ export function ClientForm({ user, label }: ClientFormProps) {
     try {
       if (url) {
         await edgestore.myPublicFiles.confirmUpload({ url });
-
-
       }
 
       const result = await createTravelOrder(data);

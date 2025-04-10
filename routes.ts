@@ -6,7 +6,7 @@ export const publicRoutes = ["/", "/auth/new-verification"];
 
 /**
  * An array of routes that require authentication
- * These routes will redirect logged in users to /settings
+ * These routes will redirect logged in users to depending on their role
  * @type {string[]}
  */
 export const authRoutes = [
@@ -18,6 +18,8 @@ export const authRoutes = [
 ];
 
 export const apiAuthPrefix = "/api/auth";
+
+export const apiAuthEdgeStore = "/api/edgestore"
 
 /**
  * The default redirect path after logging in
@@ -31,6 +33,8 @@ export const DEFAULT_LOGIN_REDIRECT = (role: string): string => {
     return "/client";
   } else if (role === "SIGNATORY") {
     return "/signatory";
+  } else if (role === "UNKNOWN"){
+    return "/auth/login";
   } else {
     return "/auth/login";
   }
