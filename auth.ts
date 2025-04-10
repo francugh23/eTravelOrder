@@ -48,9 +48,6 @@ export const {
       //   });
       // }
 
-      
-
-
       return !!user;
     },
     async session({ token, session }) {
@@ -71,7 +68,6 @@ export const {
       //   session.user.email = token.email as string;
       //   session.user.isOAuth = token.isOAuth as boolean;
       // }
-
 
       // return session;
       if (session.user) {
@@ -98,7 +94,7 @@ export const {
       // token.role = existingUser.role;
       // token.isTwoFactorEnabled = existingUser.isTwoFactorEnabled;
 
-      const prismaUser = user as User
+      const prismaUser = user as User;
       if (user) {
         token.sub = prismaUser.id;
         token.name = prismaUser.name;

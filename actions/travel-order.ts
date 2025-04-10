@@ -8,7 +8,7 @@ import { getCurrentUser } from "./server";
 export const createTravelOrder = async (
   values: z.infer<typeof TravelFormSchema>
 ) => {
-  const generateCode = () => {
+  const generateCode = async () => {
     const now = new Date();
     const day = String(now.getDate()).padStart(2, "0");
     const month = String(now.getMonth() + 1).padStart(2, "0");
@@ -18,7 +18,20 @@ export const createTravelOrder = async (
       String.fromCharCode(Math.floor(Math.random() * 26) + 65)
     ).join("");
 
-    const code = `TO-${day}-${month}-${year}-${randomLetters}`;
+    const randomNumbers = String(Math.floor(Math.random() * 1000)).padStart(
+      3,
+      "0"
+    );
+
+    const code = `TO-${day}${month}${year}-${randomLetters}${randomNumbers}`;
+
+    const existingTravelOrderCode = await prisma.travelOrder.findUnique({
+      where: { code: code},
+    });
+
+    if (existingTravelOrderCode) {
+      return generateCode();
+    }
 
     return code;
   };
@@ -44,7 +57,7 @@ export const createTravelOrder = async (
   try {
     await prisma.travelOrder.create({
       data: {
-        code: generateCode(),
+        code: await generateCode(),
         userId: user?.user?.id as string,
         purpose: purpose,
         host: host,
@@ -56,9 +69,9 @@ export const createTravelOrder = async (
       },
     });
 
-    return { success: "Travel order submitted!" };
+    return { success: "Travel order request submitted!" };
   } catch (error) {
-    return { error: "Failed to submit travel order!" };
+    return { error: "Failed to submit travel order request!" };
   }
 };
 
