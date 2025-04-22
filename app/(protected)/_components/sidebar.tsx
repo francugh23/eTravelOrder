@@ -8,6 +8,7 @@ import {
   NotebookPen,
   UsersRound,
   Car,
+  Loader,
 } from "lucide-react";
 import Image from "next/image";
 import {
@@ -51,7 +52,7 @@ export function AppSidebar() {
               height={45}
             />
           </span>
-          <span className="text-4xl align-text-bottom font-bold">e-Travel</span>
+          <span className="text-4xl align-text-bottom font-bold">E-TRAVEL</span>
         </section>
         <Separator />
       </SidebarHeader>
@@ -95,6 +96,23 @@ export function AppSidebar() {
                     menuTitle: "Travel Order",
                     url: "/client",
                     menuIcon: NotebookPen,
+                  },
+                ]}
+              />
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
+        {user?.user?.role === UserRole.SIGNATORY && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenuSingle
+                menuItems={[
+                  {
+                    menuTitle: "Pending Requests",
+                    url: "/signatory",
+                    menuIcon: Loader,
                   },
                 ]}
               />

@@ -26,7 +26,7 @@ export const createTravelOrder = async (
     const code = `TO-${day}${month}${year}-${randomLetters}${randomNumbers}`;
 
     const existingTravelOrderCode = await prisma.travelOrder.findUnique({
-      where: { code: code},
+      where: { code: code },
     });
 
     if (existingTravelOrderCode) {
@@ -90,5 +90,55 @@ export const fetchTravelOrdersById = async (userId: string) => {
     return [];
   } finally {
     await prisma.$disconnect;
+  }
+};
+
+export const fetchTravelOrderRequestForASDS = async (userId: string) => {
+  try {
+    await prisma.$connect();
+
+    const user = await prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        positionDesignation: true,
+      },
+    });
+
+    if (user?.positionDesignation === "ASDS") {
+      const data = await prisma.travelOrder.findMany({
+        where: {
+          isRecommendingApprovalSigned: false,
+        },
+      });
+
+      return data;
+    } else {
+      return [];
+    }
+  } catch {
+    return [];
+  } finally {
+    await prisma.$disconnect();
+  }
+};
+
+export const updateTravelRequestOrderById = async (id: string) => {
+  try {
+    await prisma.$connect();
+
+    await prisma.travelOrder.update({
+      where: { id: id },
+      data: {
+        isRecommendingApprovalSigned: true,
+      },
+    });
+
+    return { success: "Travel order request approved!" };
+  } catch (error) {
+    return { error: "Failed to approve travel order request!" };
+  } finally {
+    await prisma.$disconnect();
   }
 };

@@ -91,10 +91,10 @@ export const AddUserSchema = z.object({
 
 export const TravelFormSchema = z.object({
   additionalParticipants: z.optional(z.string()),
-  purpose: z.string().min(1, { message: "Purpose is required" }),
-  host: z.string().min(1, { message: "Host is required" }),
-  inclusiveDates: z.string().min(1, { message: "Inclusive Dates is required" }),
-  destination: z.string().min(1, { message: "Destination is required" }),
-  fundSource: z.string().min(1, { message: "Fund Source is required" }),
-  attachedFile: z.string().optional(),
+  purpose: z.string().min(1, { message: "Purpose is required." }),
+  host: z.string().min(1, { message: "Host is required." }),
+  inclusiveDates: z.string().min(1, { message: "Inclusive Dates is required." }),
+  destination: z.string().min(1, { message: "Destination is required." }),
+  fundSource: z.string().min(1, { message: "Fund Source is required." }),
+  attachedFile: z.string().min(1, {message: "Please attach a file."}),
 });
